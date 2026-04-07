@@ -1,19 +1,13 @@
 import { useState } from "react";
-import type {
-  ExtensionResponse,
-  TargetLanguage
-} from "../shared/types";
+import type { ExtensionResponse, TargetLanguage } from "../shared/types";
 
 const languages: { value: TargetLanguage; label: string }[] = [
-  { value: "es", label: "Spanish" },
-  { value: "fr", label: "French" },
-  { value: "de", label: "German" },
-  { value: "it", label: "Italian" },
-  { value: "pt", label: "Portuguese" }
+  { value: "ch", label: "Chinese" },
+  { value: "jp", label: "Japanese" },
 ];
 
 export default function App() {
-  const [targetLanguage, setTargetLanguage] = useState<TargetLanguage>("es");
+  const [targetLanguage, setTargetLanguage] = useState<TargetLanguage>("ch");
   const [capturedText, setCapturedText] = useState("");
   const [translatedText, setTranslatedText] = useState("");
   const [loading, setLoading] = useState(false);
@@ -78,35 +72,16 @@ export default function App() {
         {loading ? "Working..." : "Capture Page Text"}
       </button>
 
-      {error ? (
-        <div style={{ color: "crimson", marginBottom: 12 }}>{error}</div>
-      ) : null}
-
+      {error ? ( <div style={{ color: "crimson", marginBottom: 12 }}>{error}</div> ) : null}
       <label style={{ display: "block", marginBottom: 8 }}>
         Captured text
       </label>
-      <textarea
-        value={capturedText}
-        readOnly
-        rows={6}
-        style={{ width: "100%", marginBottom: 12, resize: "vertical" }}
-      />
-
+      <textarea value={capturedText}readOnly rows={6} style={{ width: "100%", marginBottom: 12, resize: "vertical" }} />
       <label style={{ display: "block", marginBottom: 8 }}>
         Translated text
       </label>
-      <textarea
-        value={translatedText}
-        readOnly
-        rows={6}
-        style={{ width: "100%", marginBottom: 12, resize: "vertical" }}
-      />
-
-      <button
-        onClick={handleCopy}
-        disabled={!translatedText}
-        style={{ width: "100%", padding: 10 }}
-      >
+      <textarea value={translatedText} readOnly rows={6} style={{ width: "100%", marginBottom: 12, resize: "vertical" }}/>
+      <button onClick={handleCopy} disabled={!translatedText} style={{ width: "100%", padding: 10 }}>
         Copy Translation
       </button>
     </div>
