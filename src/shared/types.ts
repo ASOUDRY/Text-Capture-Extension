@@ -1,4 +1,4 @@
-export type TargetLanguage = "es" | "fr" | "de" | "it" | "pt";
+export type TargetLanguage = "ch" | "jp";
 
 export type CapturePageTextMessage = {
   type: "CAPTURE_PAGE_TEXT";
@@ -33,6 +33,4 @@ export type ExtensionErrorResponse = {
   error: string;
 };
 
-export type ExtensionResponse =
-  | ExtensionSuccessResponse
-  | ExtensionErrorResponse;
+export type ExtensionResponse = | ExtensionSuccessResponse | ExtensionErrorResponse;
