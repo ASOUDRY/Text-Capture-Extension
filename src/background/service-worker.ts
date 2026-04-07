@@ -55,20 +55,16 @@ async function translateText(
 
   return response.json();
 }
-
+// receives message from google api
 chrome.runtime.onMessage.addListener(
-  (
-    message: PopupToBackgroundMessage,
-    _sender,
-    sendResponse: (response: ExtensionResponse) => void
-  ) => {
+  ( message: PopupToBackgroundMessage, _sender, sendResponse: (response: ExtensionResponse) => void ) => {
     if (message.type !== "CAPTURE_AND_TRANSLATE") {
       return;
     }
-
     (async () => {
       try {
         const tabId = await getActiveTabId();
+        // calls requestPageText
         const capturedText = await requestPageTextFromContentScript(tabId);
 
         if (!capturedText) {
@@ -78,7 +74,7 @@ chrome.runtime.onMessage.addListener(
           });
           return;
         }
-
+        //  calls translate text
         const translation = await translateText({
           text: capturedText,
           targetLanguage: message.targetLanguage
@@ -99,7 +95,6 @@ chrome.runtime.onMessage.addListener(
         });
       }
     })();
-
     return true;
   }
 );
