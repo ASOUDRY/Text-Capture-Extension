@@ -1,13 +1,9 @@
-import type {
-  BackgroundToContentMessage
-} from "../shared/types";
+import type { BackgroundToContentMessage } from "../shared/types";
 
 function isVisible(element: HTMLElement): boolean {
   const style = window.getComputedStyle(element);
-  return (
-    style.display !== "none" &&
-    style.visibility !== "hidden" &&
-    style.opacity !== "0"
+  return ( 
+    style.display !== "none" && style.visibility !== "hidden" && style.opacity !== "0" 
   );
 }
 
@@ -21,20 +17,16 @@ function captureVisibleText(): string {
     "HEADER",
     "SVG"
   ]);
-
   const walker = document.createTreeWalker(
     document.body,
     NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT
   );
-
   const parts: string[] = [];
   let node: Node | null = walker.nextNode();
-
   while (node) {
     if (node.nodeType === Node.TEXT_NODE) {
       const text = node.textContent?.trim();
       const parent = node.parentElement;
-
       if (
         text &&
         parent &&
@@ -44,19 +36,13 @@ function captureVisibleText(): string {
         parts.push(text);
       }
     }
-
     node = walker.nextNode();
   }
-
   return parts.join(" ").replace(/\s+/g, " ").trim();
 }
 
 chrome.runtime.onMessage.addListener(
-  (
-    message: BackgroundToContentMessage,
-    _sender,
-    sendResponse
-  ) => {
+  ( message: BackgroundToContentMessage, _sender, sendResponse ) => {
     if (message.type === "CAPTURE_PAGE_TEXT") {
       try {
         const text = captureVisibleText();
@@ -71,7 +57,6 @@ chrome.runtime.onMessage.addListener(
         });
       }
     }
-
     return true;
   }
 );
