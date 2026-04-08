@@ -1,89 +1,151 @@
 import { useState } from "react";
-import type { ExtensionResponse, TargetLanguage } from "../shared/types";
+type ExtensionSuccessResponse = {
+  ok: true;
+  selectedImage?: boolean;
+  extractedText?: string;
+  translatedText?: string;
+};
+type ExtensionErrorResponse = {
+  ok: false;
+  error: string;
+};
+type ExtensionResponse = ExtensionSuccessResponse | ExtensionErrorResponse;
 
-const languages: { value: TargetLanguage; label: string }[] = [
-  { value: "ch", label: "Chinese" },
-  { value: "jp", label: "Japanese" },
-];
-
-export default function App() {
-  const [targetLanguage, setTargetLanguage] = useState<TargetLanguage>("ch");
-  const [capturedText, setCapturedText] = useState("");
+function App() {
+  const [selectedImage, setSelectedImage] = useState(false);
+  const [extractedText, setExtractedText] = useState("");
   const [translatedText, setTranslatedText] = useState("");
+  const [targetLanguage, setTargetLanguage] = useState("ja");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  async function handleCaptureAndTranslate() {
-    setLoading(true);
+  async function sendMessage(message: object): Promise<ExtensionResponse> {
+    const response = await chrome.runtime.sendMessage(message);
+    return response as ExtensionResponse;
+  }
+
+  async function handleStartSelection() {
     setError("");
-    setCapturedText("");
-    setTranslatedText("");
-
     try {
-      const response = (await chrome.runtime.sendMessage({
-        type: "CAPTURE_AND_TRANSLATE",
-        targetLanguage
-      })) as ExtensionResponse;
-
+      const response = await sendMessage({ type: "START_IMAGE_SELECTION" });
       if (!response.ok) {
         setError(response.error);
         return;
       }
-
-      setCapturedText(response.capturedText);
-      setTranslatedText(response.translatedText);
+      setSelectedImage(false);
+      setExtractedText("");
+      setTranslatedText("");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      setError(err instanceof Error ? err.message : "Failed to start image selection");
+    }
+  }
+
+  async function handleRunOcr() {
+    setLoading(true);
+    setError("");
+    setTranslatedText("");
+    try {
+      const response = await sendMessage({ type: "RUN_OCR" });
+      if (!response.ok) {
+        setError(response.error);
+        return;
+      }
+      setSelectedImage(Boolean(response.selectedImage));
+      setExtractedText(response.extractedText ?? "");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to run OCR");
     } finally {
       setLoading(false);
     }
   }
 
-  async function handleCopy() {
-    if (!translatedText) return;
-    await navigator.clipboard.writeText(translatedText);
+  async function handleTranslate() {
+    if (!extractedText.trim()) {
+      setError("No OCR text to translate");
+      return;
+    }
+    setLoading(true);
+    setError("");
+    try {
+      const response = await sendMessage({
+        type: "TRANSLATE_TEXT",
+        text: extractedText,
+        targetLanguage,
+      });
+      if (!response.ok) {
+        setError(response.error);
+        return;
+      }
+      setTranslatedText(response.translatedText ?? "");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to translate text");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function handleReset() {
+    setSelectedImage(false);
+    setExtractedText("");
+    setTranslatedText("");
+    setError("");
+    setLoading(false);
   }
 
   return (
-    <div style={{ width: 380, padding: 16, fontFamily: "Arial, sans-serif" }}>
-      <h2 style={{ marginTop: 0 }}>Text Capture Translator</h2>
+    <main style={{ padding: "1rem", width: 320 }}>
+      <h1>Image Text Capture</h1>
 
-      <label style={{ display: "block", marginBottom: 8 }}>
-        Target language
-      </label>
+      <div style={{ marginBottom: "1rem" }}>
+        <button onClick={handleStartSelection} disabled={loading}>
+          Select Image
+        </button>
+      </div>
 
-      <select
-        value={targetLanguage}
-        onChange={(e) => setTargetLanguage(e.target.value as TargetLanguage)}
-        style={{ width: "100%", marginBottom: 12, padding: 8 }}
-      >
-        {languages.map((lang) => (
-          <option key={lang.value} value={lang.value}>
-            {lang.label}
-          </option>
-        ))}
-      </select>
+      <div style={{ marginBottom: "1rem" }}>
+        <button onClick={handleRunOcr} disabled={loading}>
+          Run OCR
+        </button>
+      </div>
 
-      <button
-        onClick={handleCaptureAndTranslate}
-        disabled={loading}
-        style={{ width: "100%", padding: 10, marginBottom: 12 }}
-      >
-        {loading ? "Working..." : "Capture Page Text"}
-      </button>
+      <div style={{ marginBottom: "1rem" }}>
+        <label htmlFor="targetLanguage">Target language: </label>
+        <select id="targetLanguage" value={targetLanguage} onChange={(e) => setTargetLanguage(e.target.value)} disabled={loading}>
+          <option value="ja">Japanese</option>
+          <option value="zh">Chinese</option>
+          <option value="fr">French</option>
+        </select>
+      </div>
 
-      {error ? ( <div style={{ color: "crimson", marginBottom: 12 }}>{error}</div> ) : null}
-      <label style={{ display: "block", marginBottom: 8 }}>
-        Captured text
-      </label>
-      <textarea value={capturedText}readOnly rows={6} style={{ width: "100%", marginBottom: 12, resize: "vertical" }} />
-      <label style={{ display: "block", marginBottom: 8 }}>
-        Translated text
-      </label>
-      <textarea value={translatedText} readOnly rows={6} style={{ width: "100%", marginBottom: 12, resize: "vertical" }}/>
-      <button onClick={handleCopy} disabled={!translatedText} style={{ width: "100%", padding: 10 }}>
-        Copy Translation
-      </button>
-    </div>
+      <div style={{ marginBottom: "1rem" }}>
+        <button onClick={handleTranslate} disabled={loading || !extractedText.trim()}>
+          Translate
+        </button>
+      </div>
+
+      <div style={{ marginBottom: "1rem" }}>
+        <button onClick={handleReset} disabled={loading}>
+          Reset
+        </button>
+      </div>
+
+      <section style={{ marginBottom: "1rem" }}>
+        <strong>Image selected:</strong> {selectedImage ? "Yes" : "No"}
+      </section>
+
+      <section style={{ marginBottom: "1rem" }}>
+        <h2>Extracted Text</h2>
+        <textarea value={extractedText} onChange={(e) => setExtractedText(e.target.value)} rows={6} style={{ width: "100%" }} />
+      </section>
+
+      <section style={{ marginBottom: "1rem" }}>
+        <h2>Translated Text</h2>
+        <textarea value={translatedText} readOnly rows={6} style={{ width: "100%" }} />
+      </section>
+
+      {loading && <p>Working...</p>}
+      {error && <p style={{ color: "red" }}>{error}</p>}
+    </main>
   );
 }
+export default App;

@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Text Capture Translator",
   "version": "1.0.0",
-  "description": "Capture visible page text and translate it.",
+  "description": "Select images on a page, extract text with OCR, and translate it.",
   "action": {
     "default_popup": "index.html"
   },
@@ -10,7 +10,7 @@
     "service_worker": "service-worker.js",
     "type": "module"
   },
-  "permissions": ["activeTab", "tabs", "storage"],
+  "permissions": ["activeTab"],
   "host_permissions": [
     "<all_urls>",
     "http://localhost:8080/*"

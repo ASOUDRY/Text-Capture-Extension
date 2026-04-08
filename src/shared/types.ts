@@ -1,31 +1,29 @@
-export type TargetLanguage = "ch" | "jp";
+// src/shared/types.ts
 
-export type CapturePageTextMessage = {
-  type: "CAPTURE_PAGE_TEXT";
+export type StartImageSelectionMessage = {
+  type: "START_IMAGE_SELECTION";
 };
 
-export type CaptureAndTranslateMessage = {
-  type: "CAPTURE_AND_TRANSLATE";
-  targetLanguage: TargetLanguage;
+export type RunOcrMessage = {
+  type: "RUN_OCR";
 };
 
-export type PopupToBackgroundMessage = CaptureAndTranslateMessage;
-
-export type BackgroundToContentMessage = CapturePageTextMessage;
-
-export type TranslateRequest = {
+export type TranslateTextMessage = {
+  type: "TRANSLATE_TEXT";
   text: string;
-  targetLanguage: TargetLanguage;
+  targetLanguage: string;
 };
 
-export type TranslateResponse = {
-  translatedText: string;
-};
+export type ExtensionMessage =
+  | StartImageSelectionMessage
+  | RunOcrMessage
+  | TranslateTextMessage;
 
 export type ExtensionSuccessResponse = {
   ok: true;
-  capturedText: string;
-  translatedText: string;
+  selectedImage?: boolean;
+  extractedText?: string;
+  translatedText?: string;
 };
 
 export type ExtensionErrorResponse = {
@@ -33,4 +31,28 @@ export type ExtensionErrorResponse = {
   error: string;
 };
 
-export type ExtensionResponse = | ExtensionSuccessResponse | ExtensionErrorResponse;
+export type ExtensionResponse =
+  | ExtensionSuccessResponse
+  | ExtensionErrorResponse;
+
+export type SelectedImageResponse =
+  | {
+      ok: true;
+      imageUrl: string;
+    }
+  | {
+      ok: false;
+      error: string;
+    };
+
+export type EnableImageSelectionMessage = {
+  type: "ENABLE_IMAGE_SELECTION";
+};
+
+export type GetSelectedImageMessage = {
+  type: "GET_SELECTED_IMAGE";
+};
+
+export type ContentMessage =
+  | EnableImageSelectionMessage
+  | GetSelectedImageMessage;
