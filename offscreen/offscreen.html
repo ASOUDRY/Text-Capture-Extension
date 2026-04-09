@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Offscreen OCR</title>
+  </head>
+  <body>
+    <p>Yippe kaiye</p>
+    <!-- Hidden extension page used for OCR work.
+         The user never sees this page. -->
+
+    <!-- Loads the offscreen script that listens for messages
+         from the service worker and runs OCR. -->
+    <script type="module" src="./offscreen.ts"></script>
+  </body>
+</html>
