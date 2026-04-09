@@ -1,5 +1,3 @@
-// src/shared/types.ts
-
 export type StartImageSelectionMessage = {
   type: "START_IMAGE_SELECTION";
 };
@@ -56,3 +54,34 @@ export type GetSelectedImageMessage = {
 export type ContentMessage =
   | EnableImageSelectionMessage
   | GetSelectedImageMessage;
+
+export type ContentSuccessResponse = {
+  ok: true;
+  imageUrl?: string;
+};
+
+export type ContentErrorResponse = {
+  ok: false;
+  error: string;
+};
+
+export type ContentResponse =
+  | ContentSuccessResponse
+  | ContentErrorResponse;
+
+export type RunOffscreenOcrMessage = {
+  type: "RUN_OFFSCREEN_OCR";
+  imageUrl: string;
+  language?: string;
+};
+
+export type OffscreenOcrResponse =
+  | {
+      ok: true;
+      extractedText: string;
+    }
+  | {
+      ok: false;
+      error: string;
+    };
+

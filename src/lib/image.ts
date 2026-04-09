@@ -23,20 +23,26 @@ export function isSupportedImageType(contentType: string | null): boolean {
 
 export async function fetchImageBlob(imageUrl: string): Promise<Blob> {
   const safeUrl = validateImageUrl(imageUrl);
+   console.log("fetching image url:", safeUrl);
 
   const response = await fetch(safeUrl);
+  console.log("fetch status:", response.status, response.statusText);
 
   if (!response.ok) {
     throw new Error(`Failed to fetch image: ${response.status}`);
   }
 
   const contentType = response.headers.get("content-type");
+    console.log("content-type:", contentType);
 
   if (!isSupportedImageType(contentType)) {
     throw new Error("Fetched resource is not an image");
   }
 
-  return await response.blob();
+  const blob = await response.blob();
+  console.log("blob size:", blob.size);
+
+  return blob;
 }
 
 export async function prepareImageForOcr(imageUrl: string): Promise<Blob> {

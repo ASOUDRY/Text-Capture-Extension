@@ -1,25 +1,5 @@
-type EnableImageSelectionMessage = {
-  type: "ENABLE_IMAGE_SELECTION";
-};
-
-type GetSelectedImageMessage = {
-  type: "GET_SELECTED_IMAGE";
-};
-
-type ContentMessage = EnableImageSelectionMessage | GetSelectedImageMessage;
-
-type SuccessResponse = {
-  ok: true;
-  imageUrl?: string;
-};
-
-type ErrorResponse = {
-  ok: false;
-  error: string;
-};
-
-type ContentResponse = SuccessResponse | ErrorResponse;
-
+import type { ContentMessage, ContentResponse } from "../shared/types";
+console.log("capture script loaded");
 let selectionModeEnabled = false;
 let selectedImageUrl: string | null = null;
 let hoveredImage: HTMLImageElement | null = null;
@@ -34,10 +14,6 @@ function disableSelectionMode(): void {
   selectionModeEnabled = false;
   document.body.style.cursor = "";
   clearHighlight();
-}
-
-function isSelectableImage(element: EventTarget | null): element is HTMLImageElement {
-  return element instanceof HTMLImageElement;
 }
 
 function highlightImage(image: HTMLImageElement): void {
@@ -58,29 +34,48 @@ function handleMouseOver(event: MouseEvent): void {
     return;
   }
 
-  if (isSelectableImage(event.target)) {
-    highlightImage(event.target);
+  const image = findImageInEvent(event);
+
+  if (image) {
+    highlightImage(image);
     return;
   }
 
   clearHighlight();
 }
 
+function findImageInEvent(event: MouseEvent): HTMLImageElement | null {
+  const path = event.composedPath();
+
+  for (const item of path) {
+    if (item instanceof HTMLImageElement) {
+      return item;
+    }
+  }
+
+  return null;
+}
+
 function handlePageClick(event: MouseEvent): void {
+  console.log("page click detected");
   if (!selectionModeEnabled) {
     return;
   }
 
-  if (!isSelectableImage(event.target)) {
+  const image = findImageInEvent(event);
+console.log("image found" + image);
+  if (!image) {
     return;
   }
 
   event.preventDefault();
   event.stopPropagation();
 
-  selectedImageUrl = event.target.currentSrc || event.target.src;
+  selectedImageUrl = image.currentSrc || image.src;
+    console.log("selected image url:", selectedImageUrl);
   disableSelectionMode();
 }
+
 
 function getSelectedImage(): ContentResponse {
   if (!selectedImageUrl) {

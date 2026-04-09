@@ -1,7 +1,5 @@
-// src/lib/ocr.ts
-
 import { createWorker } from "tesseract.js";
-
+console.log("ocr.ts loaded")
 export function normalizeOcrText(text: string): string {
   return text
     .replace(/\r\n/g, "\n")
@@ -19,17 +17,32 @@ export function validateOcrInput(imageBlob: Blob): void {
   }
 }
 
-export async function runOcrOnImage(
-  imageBlob: Blob,
-  language = "eng",
-): Promise<string> {
+export async function runOcrOnImage(imageBlob: Blob, language = "eng"): Promise<string> {
+  console.log("RunOcrOnImageCalled");
+
   validateOcrInput(imageBlob);
 
-  const worker = await createWorker(language);
+  let worker;
+
+  try {
+    console.log("about to call createWorker");
+    worker = await createWorker(language, 1, {
+      workerPath: chrome.runtime.getURL("tesseract/worker.min.js"),
+      workerBlobURL: false,
+      corePath: chrome.runtime.getURL("tesseract-core"),
+      logger: (m) => console.log("tesseract logger:", m),
+    });
+    console.log("worker created:", worker);
+  } catch (error) {
+    console.error("createWorker failed:", error);
+    throw error;
+  }
 
   try {
     const result = await worker.recognize(imageBlob);
+    console.log("result:", result);
     const rawText = result.data.text ?? "";
+    console.log("rawText:", rawText);
     return normalizeOcrText(rawText);
   } finally {
     await worker.terminate();

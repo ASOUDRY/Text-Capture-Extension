@@ -1,16 +1,5 @@
 import { useState } from "react";
-type ExtensionSuccessResponse = {
-  ok: true;
-  selectedImage?: boolean;
-  extractedText?: string;
-  translatedText?: string;
-};
-type ExtensionErrorResponse = {
-  ok: false;
-  error: string;
-};
-type ExtensionResponse = ExtensionSuccessResponse | ExtensionErrorResponse;
-
+import type { ExtensionMessage, ExtensionResponse } from "../shared/types";
 function App() {
   const [selectedImage, setSelectedImage] = useState(false);
   const [extractedText, setExtractedText] = useState("");
@@ -19,7 +8,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  async function sendMessage(message: object): Promise<ExtensionResponse> {
+  async function sendMessage(message: ExtensionMessage): Promise<ExtensionResponse> {
     const response = await chrome.runtime.sendMessage(message);
     return response as ExtensionResponse;
   }

@@ -10,8 +10,9 @@ export default defineConfig({
     rollupOptions: {
       input: {
         popup: resolve(__dirname, "index.html"),
+        offscreen: resolve(__dirname, "offscreen/offscreen.html"),
         "service-worker": resolve(__dirname, "src/background/service-worker.ts"),
-        capture: resolve(__dirname, "src/content/capture.ts")
+        capture: resolve(__dirname, "src/content/capture.ts"),
       },
       output: {
         entryFileNames: (chunkInfo) => {
@@ -24,8 +25,8 @@ export default defineConfig({
           return "assets/[name].js";
         },
         chunkFileNames: "assets/[name].js",
-        assetFileNames: "assets/[name].[ext]"
-      }
-    }
-  }
+        assetFileNames: "assets/[name].[ext]",
+      },
+    },
+  },
 });
