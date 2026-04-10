@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "Select images on a page, extract text with OCR, and translate it.",
   "action": {
-    "default_popup": "index.html"
+    "default_title": "Open Text Capture"
   },
   "background": {
     "service_worker": "service-worker.js",
@@ -12,8 +12,12 @@
   },
   "permissions": [
     "activeTab",
-    "offscreen"
+    "offscreen",
+    "sidePanel"
   ],
+   "side_panel": {
+    "default_path": "index.html"
+  },
   "host_permissions": [
     "<all_urls>",
     "http://localhost:8080/*"
