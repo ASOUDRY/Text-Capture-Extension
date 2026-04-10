@@ -1,10 +1,11 @@
 import type { ContentMessage, ContentResponse } from "../shared/types";
-console.log("capture script loaded");
 let selectionModeEnabled = false;
 let selectedImageUrl: string | null = null;
 let hoveredImage: HTMLImageElement | null = null;
 
+
 function enableSelectionMode(): void {
+  console.log("Step 5 enable selection");
   selectionModeEnabled = true;
   selectedImageUrl = null;
   document.body.style.cursor = "crosshair";
@@ -56,24 +57,22 @@ function findImageInEvent(event: MouseEvent): HTMLImageElement | null {
   return null;
 }
 
-function handlePageClick(event: MouseEvent): void {
-  console.log("page click detected");
-  if (!selectionModeEnabled) {
-    return;
-  }
-
+async function handlePageClick(event: MouseEvent): Promise<void> {
+  console.log("click");
+  if (!selectionModeEnabled) return;
   const image = findImageInEvent(event);
-console.log("image found" + image);
-  if (!image) {
-    return;
-  }
-
+    console.log("image", image);
+  if (!image) return;
   event.preventDefault();
   event.stopPropagation();
-
   selectedImageUrl = image.currentSrc || image.src;
-    console.log("selected image url:", selectedImageUrl);
   disableSelectionMode();
+  console.log("start await")
+  await chrome.runtime.sendMessage({
+    type: "IMAGE_SELECTED",
+    imageUrl: selectedImageUrl,
+  });
+    console.log("conclude await")
 }
 
 
@@ -92,11 +91,7 @@ function getSelectedImage(): ContentResponse {
 }
 
 chrome.runtime.onMessage.addListener(
-  (
-    message: ContentMessage,
-    _sender,
-    sendResponse: (response: ContentResponse) => void,
-  ) => {
+  (message: ContentMessage, _sender, sendResponse: (response: ContentResponse) => void,) => {
     if (message.type === "ENABLE_IMAGE_SELECTION") {
       enableSelectionMode();
       sendResponse({ ok: true });

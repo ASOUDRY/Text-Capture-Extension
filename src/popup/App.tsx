@@ -1,5 +1,7 @@
 import { useState } from "react";
 import type { ExtensionMessage, ExtensionResponse } from "../shared/types";
+
+console.log("App loaded")
 function App() {
   const [selectedImage, setSelectedImage] = useState(false);
   const [extractedText, setExtractedText] = useState("");
@@ -16,7 +18,9 @@ function App() {
   async function handleStartSelection() {
     setError("");
     try {
+      console.log("Step 1. Go to Service Worker next")
       const response = await sendMessage({ type: "START_IMAGE_SELECTION" });
+      console.log("Step 6 response:", response)
       if (!response.ok) {
         setError(response.error);
         return;
@@ -35,6 +39,7 @@ function App() {
     setTranslatedText("");
     try {
       const response = await sendMessage({ type: "RUN_OCR" });
+      console.log("from handleRubOcr", response);
       if (!response.ok) {
         setError(response.error);
         return;
@@ -80,6 +85,14 @@ function App() {
     setError("");
     setLoading(false);
   }
+
+  chrome.runtime.onMessage.addListener((message) => {
+  if (message.type === "IMAGE_SELECTED") {
+    console.log("popup got image", message.imageUrl);
+    // update popup state here
+    setSelectedImage(true);
+  }
+});
 
   return (
     <main style={{ padding: "1rem", width: 320 }}>
