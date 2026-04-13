@@ -4,6 +4,7 @@ export type StartImageSelectionMessage = {
 
 export type RunOcrMessage = {
   type: "RUN_OCR";
+  target: "Offscreen"
 };
 
 export type TranslateTextMessage = {
@@ -73,6 +74,7 @@ export type RunOffscreenOcrMessage = {
   type: "RUN_OFFSCREEN_OCR";
   imageUrl: string;
   language?: string;
+  target: "offscreen"
 };
 
 export type OffscreenOcrResponse =
@@ -85,3 +87,16 @@ export type OffscreenOcrResponse =
       error: string;
     };
 
+export type OffscreenMessage = RunOffscreenOcrMessage;
+
+export type OffscreenSuccessResponse = {
+  ok: true;
+  extractedText: string;
+};
+
+export type OffscreenErrorResponse = {
+  ok: false;
+  error: string;
+};
+
+export type OffscreenResponse = OffscreenSuccessResponse | OffscreenErrorResponse;
