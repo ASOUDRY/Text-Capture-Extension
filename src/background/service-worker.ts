@@ -6,15 +6,13 @@ chrome.runtime.onInstalled.addListener(() => {
 const OFFSCREEN_DOCUMENT_PATH = "offscreen/offscreen.html";
 // Called by handleStartImageSelection() and handleRunOcr().
 // Finds the active tab so the service worker knows which page to talk to.
-
 async function getActiveTabId(): Promise<number> {
+  console.log("tabId function starts")
   const tabs = await chrome.tabs.query({
     active: true,
     currentWindow: true,
   });
-
   const tabId = tabs[0]?.id;
-
   if (tabId === undefined) {
     throw new Error("No active tab found");
   }
@@ -91,10 +89,12 @@ async function ensureOffscreenDocument(): Promise<void> {
 // Sends the selected image URL to offscreen.ts and waits for OCR text back.
 async function runOcrInOffscreen( imageUrl: string, language = "eng",): Promise<string> {
   await ensureOffscreenDocument();
+  const target = "offscreen"
   const response = (await chrome.runtime.sendMessage({
     type: "RUN_OFFSCREEN_OCR",
     imageUrl,
     language,
+    target
   } satisfies RunOffscreenOcrMessage)) as OffscreenOcrResponse | undefined;
   if (!response) {
     throw new Error("No response from offscreen document");
@@ -116,6 +116,7 @@ async function handleStartImageSelection(): Promise<ExtensionResponse> {
   console.log("Step 2")
   const tabId = await getActiveTabId();
   await enableImageSelection(tabId);
+  console.log("handleStartImage selection end")
   return {
     ok: true,
     selectedImage: false,
