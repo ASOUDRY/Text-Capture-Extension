@@ -1,10 +1,28 @@
+export type Region = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+
+export type SelectedImagePayload = {
+  src: string;
+  naturalWidth: number;
+  naturalHeight: number;
+  displayedWidth: number;
+  displayedHeight: number;
+  viewportRegion: Region;
+  naturalRegion: Region;
+  viewportHeight: number;
+  viewportWidth: number
+};
+
 export type StartImageSelectionMessage = {
   type: "START_IMAGE_SELECTION";
 };
 
 export type RunOcrMessage = {
   type: "RUN_OCR";
-  target: "Offscreen"
 };
 
 export type TranslateTextMessage = {
@@ -13,10 +31,20 @@ export type TranslateTextMessage = {
   targetLanguage: string;
 };
 
+export type EnableImageSelectionMessage = {
+  type: "ENABLE_IMAGE_SELECTION";
+};
+
+export type ImageRegionSelectedMessage = {
+  type: "IMAGE_REGION_SELECTED";
+  payload: SelectedImagePayload;
+};
+
 export type ExtensionMessage =
   | StartImageSelectionMessage
   | RunOcrMessage
-  | TranslateTextMessage;
+  | TranslateTextMessage
+  | ImageRegionSelectedMessage;
 
 export type ExtensionSuccessResponse = {
   ok: true;
@@ -34,31 +62,10 @@ export type ExtensionResponse =
   | ExtensionSuccessResponse
   | ExtensionErrorResponse;
 
-export type SelectedImageResponse =
-  | {
-      ok: true;
-      imageUrl: string;
-    }
-  | {
-      ok: false;
-      error: string;
-    };
-
-export type EnableImageSelectionMessage = {
-  type: "ENABLE_IMAGE_SELECTION";
-};
-
-export type GetSelectedImageMessage = {
-  type: "GET_SELECTED_IMAGE";
-};
-
-export type ContentMessage =
-  | EnableImageSelectionMessage
-  | GetSelectedImageMessage;
+export type ContentMessage = EnableImageSelectionMessage;
 
 export type ContentSuccessResponse = {
   ok: true;
-  imageUrl?: string;
 };
 
 export type ContentErrorResponse = {
@@ -74,7 +81,7 @@ export type RunOffscreenOcrMessage = {
   type: "RUN_OFFSCREEN_OCR";
   imageUrl: string;
   language?: string;
-  target: "offscreen"
+  target: "offscreen";
 };
 
 export type OffscreenOcrResponse =
@@ -86,17 +93,3 @@ export type OffscreenOcrResponse =
       ok: false;
       error: string;
     };
-
-export type OffscreenMessage = RunOffscreenOcrMessage;
-
-export type OffscreenSuccessResponse = {
-  ok: true;
-  extractedText: string;
-};
-
-export type OffscreenErrorResponse = {
-  ok: false;
-  error: string;
-};
-
-export type OffscreenResponse = OffscreenSuccessResponse | OffscreenErrorResponse;

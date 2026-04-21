@@ -1,7 +1,6 @@
 import { useState } from "react";
 import type { ExtensionMessage, ExtensionResponse } from "../shared/types";
 
-console.log("App loaded")
 function App() {
   const [selectedImage, setSelectedImage] = useState(false);
   const [extractedText, setExtractedText] = useState("");
@@ -15,16 +14,17 @@ function App() {
     return response as ExtensionResponse;
   }
 
-  async function handleStartSelection() {
+  async function handleStartSelection(): Promise<void> {
     setError("");
+
     try {
-      console.log("Step 1. Go to Service Worker next")
       const response = await sendMessage({ type: "START_IMAGE_SELECTION" });
-      console.log("Step 6 response:", response)
+
       if (!response.ok) {
         setError(response.error);
         return;
       }
+
       setSelectedImage(false);
       setExtractedText("");
       setTranslatedText("");
@@ -33,17 +33,19 @@ function App() {
     }
   }
 
-  async function handleRunOcr() {
+  async function handleRunOcr(): Promise<void> {
     setLoading(true);
     setError("");
     setTranslatedText("");
+
     try {
       const response = await sendMessage({ type: "RUN_OCR" });
-      console.log("from handleRubOcr", response);
+
       if (!response.ok) {
         setError(response.error);
         return;
       }
+
       setSelectedImage(Boolean(response.selectedImage));
       setExtractedText(response.extractedText ?? "");
     } catch (err) {
@@ -53,23 +55,27 @@ function App() {
     }
   }
 
-  async function handleTranslate() {
+  async function handleTranslate(): Promise<void> {
     if (!extractedText.trim()) {
       setError("No OCR text to translate");
       return;
     }
+
     setLoading(true);
     setError("");
+
     try {
       const response = await sendMessage({
         type: "TRANSLATE_TEXT",
         text: extractedText,
         targetLanguage,
       });
+
       if (!response.ok) {
         setError(response.error);
         return;
       }
+
       setTranslatedText(response.translatedText ?? "");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to translate text");
@@ -78,21 +84,13 @@ function App() {
     }
   }
 
-  function handleReset() {
+  function handleReset(): void {
     setSelectedImage(false);
     setExtractedText("");
     setTranslatedText("");
     setError("");
     setLoading(false);
   }
-
-  chrome.runtime.onMessage.addListener((message) => {
-  if (message.type === "IMAGE_SELECTED") {
-    console.log("popup got image", message.imageUrl);
-    // update popup state here
-    setSelectedImage(true);
-  }
-});
 
   return (
     <main style={{ padding: "1rem", width: 320 }}>
@@ -112,7 +110,12 @@ function App() {
 
       <div style={{ marginBottom: "1rem" }}>
         <label htmlFor="targetLanguage">Target language: </label>
-        <select id="targetLanguage" value={targetLanguage} onChange={(e) => setTargetLanguage(e.target.value)} disabled={loading}>
+        <select
+          id="targetLanguage"
+          value={targetLanguage}
+          onChange={(e) => setTargetLanguage(e.target.value)}
+          disabled={loading}
+        >
           <option value="ja">Japanese</option>
           <option value="zh">Chinese</option>
           <option value="fr">French</option>
@@ -120,7 +123,10 @@ function App() {
       </div>
 
       <div style={{ marginBottom: "1rem" }}>
-        <button onClick={handleTranslate} disabled={loading || !extractedText.trim()}>
+        <button
+          onClick={handleTranslate}
+          disabled={loading || !extractedText.trim()}
+        >
           Translate
         </button>
       </div>
@@ -137,17 +143,27 @@ function App() {
 
       <section style={{ marginBottom: "1rem" }}>
         <h2>Extracted Text</h2>
-        <textarea value={extractedText} onChange={(e) => setExtractedText(e.target.value)} rows={6} style={{ width: "100%" }} />
+        <textarea
+          value={extractedText}
+          onChange={(e) => setExtractedText(e.target.value)}
+          rows={6}
+          style={{ width: "100%" }}
+        />
       </section>
 
       <section style={{ marginBottom: "1rem" }}>
         <h2>Translated Text</h2>
-        <textarea value={translatedText} readOnly rows={6} style={{ width: "100%" }} />
+        <textarea
+          value={translatedText}
+          readOnly
+          rows={6}
+          style={{ width: "100%" }}
+        />
       </section>
-
       {loading && <p>Working...</p>}
       {error && <p style={{ color: "red" }}>{error}</p>}
     </main>
   );
 }
+
 export default App;
