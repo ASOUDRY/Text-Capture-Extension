@@ -6,16 +6,25 @@ type TranslateResponseDto = {
   translatedText: string;
 };
 
-export async function handleRunOcr(): Promise<ExtensionResponse> {
+export async function handleRunOcr(language : string): Promise<ExtensionResponse> {
   const selection = getLatestSelection();
+  let lang = "";
   if (!selection) {
     return {
       ok: false,
       error: "No image region has been selected",
     };
   }
+  switch (language) {
+    case "ja": lang = "jpn";
+    break;
+    case "zh" : lang = "chi_sim";
+    break;
+    case "en" : lang = "eng";
+    break;
+  }
   const croppedImageDataUrl = await cropSelectedRegionFromVisibleTab(selection);
-  const extractedText = await runOcrInOffscreen(croppedImageDataUrl, "eng");
+  const extractedText = await runOcrInOffscreen(croppedImageDataUrl, lang);
 
   return {
     ok: true,

@@ -5,6 +5,7 @@ function App() {
   const [selectedImage, setSelectedImage] = useState(false);
   const [extractedText, setExtractedText] = useState("");
   const [translatedText, setTranslatedText] = useState("");
+  const [sourceLanguage, setSourceLanguage] = useState("");
   const [targetLanguage, setTargetLanguage] = useState("ja");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -39,7 +40,7 @@ function App() {
     setTranslatedText("");
 
     try {
-      const response = await sendMessage({ type: "RUN_OCR" });
+      const response = await sendMessage({ type: "RUN_OCR", sourceLanguage: sourceLanguage});
 
       if (!response.ok) {
         setError(response.error);
@@ -103,6 +104,20 @@ function App() {
       </div>
 
       <div style={{ marginBottom: "1rem" }}>
+        <label htmlFor="targetLanguage">Source language: </label>
+        <select
+          id="sourceLanguage"
+          value={sourceLanguage}
+          onChange={(e) => setSourceLanguage(e.target.value)}
+          disabled={loading}
+        >
+          <option value="ja">Japanese</option>
+          <option value="zh">Chinese</option>
+          <option value="en">English</option>
+        </select>
+      </div>
+
+      <div style={{ marginBottom: "1rem" }}>
         <button onClick={handleRunOcr} disabled={loading}>
           Run OCR
         </button>
@@ -116,8 +131,7 @@ function App() {
           onChange={(e) => setTargetLanguage(e.target.value)}
           disabled={loading}
         >
-          <option value="ja">Japanese</option>
-          <option value="zh">Chinese</option>
+          <option value="en">English</option>
           <option value="fr">French</option>
         </select>
       </div>

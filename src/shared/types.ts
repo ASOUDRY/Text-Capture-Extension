@@ -23,6 +23,7 @@ export type StartImageSelectionMessage = {
 
 export type RunOcrMessage = {
   type: "RUN_OCR";
+  sourceLanguage: string;
 };
 
 export type TranslateTextMessage = {

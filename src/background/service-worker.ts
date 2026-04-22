@@ -29,7 +29,7 @@ function handleRuntimeMessage(
         }
 
         case "RUN_OCR": {
-          sendResponse(await handleRunOcr());
+          sendResponse(await handleRunOcr(message.sourceLanguage));
           return;
         }
 
